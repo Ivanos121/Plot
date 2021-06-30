@@ -28,7 +28,7 @@ void Canvas::drawBorder()
     QColor coordLineColor(255,255,255);
 
     QPen apen = QPen(coordLineColor);
-    apen.setWidth(5);
+    apen.setWidth(4);
     painter.setPen(apen);
 
     painter.drawLine(QLine(margin_left + 1,20,width() - 20 - 1,20));
@@ -43,7 +43,7 @@ void Canvas::drawGrid()
     QColor coordLineColor2(255, 255, 255);
 
     QPen apen2 = QPen(coordLineColor2);
-    apen2.setWidth(1);
+    apen2.setWidthF(0.5);
     apen2.setStyle(Qt::DotLine);
     painter.setPen(apen2);
 
@@ -64,7 +64,7 @@ void Canvas::drawMainGrid()
     QColor coordLineColor3(255, 255, 255);
 
     QPen apen3 = QPen(coordLineColor3);
-    apen3.setWidth(2);
+    apen3.setWidthF(0.5);
     painter.setPen(apen3);
 
     for (int i=margin_left; i <= width() - 20; i += 100)
@@ -91,24 +91,29 @@ void Canvas::drawAxisText()
     {
         painter.setFont(QFont("helvetica", 10));
         double t = (double)(i - margin_left) / (double)(width() - margin_left - 20) * t_max;
-        painter.drawText(QPoint(i,height()), QString("%1").arg(t, 0, 'f', 4));
+        painter.drawText(QPoint(i-20,height()-15), QString("%1").arg(t, 0, 'f', 4));
     }
 
     for (int j = height() - margin_bottom; j >= 20; j -= 100)
     {
         painter.setFont(QFont("helvetica", 10));
         double U = (double)(-j + height() - margin_bottom) / (double)(height() - margin_bottom - 20) * U_max;
-        painter.drawText(QPoint(0,j), QString("%1").arg(U, 0, 'f', 4));
+        painter.drawText(QPoint(20,j+5), QString("%1").arg(U, 0, 'f', 4));
     }
     painter.setFont(QFont("helvetica", 10));
     painter.drawText(QPoint(400,10), "График чего-то там");
-    painter.drawText(QPoint(400,1030), "Ось x");
+
 }
 
 void Canvas::drawBackground()
 {
     QPainter painter(this);
-    painter.fillRect(0,0,width(),height(), QBrush(QColor(0,0,0)));
+  //  painter.fillRect(0,0,width(),height(), QBrush(QColor(0,0,0)));
+
+    QLinearGradient linearGrad;
+    linearGrad.setColorAt( 0 , QColor(80, 80, 80));
+    linearGrad.setColorAt( 1 , QColor(50, 50, 50));
+    painter.fillRect(0, 0, width(), height(), linearGrad);
 }
 
 void Canvas::paintEvent(QPaintEvent *)
@@ -162,8 +167,3 @@ void Canvas::wheelEvent(QWheelEvent *event)
     repaint();
 }
 
-
-//void timerEvent(QTimerEvent *event)
-//{
-
-//}
