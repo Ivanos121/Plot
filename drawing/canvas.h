@@ -18,12 +18,12 @@ public:
     int margin_bottom;
     int margin_left;
 
-    int pixel_offset = 500;
-
     double t_max;
     double U_max;
     double t_offset;
     double U_offset;
+
+    double gridStep;
 
 private:
     Ui::Canvas *ui;
