@@ -14,6 +14,7 @@ class Canvas : public QWidget
 public:
     explicit Canvas(QWidget *parent = nullptr);
     ~Canvas();
+    void paintEvent(QPaintEvent *);
 
     int margin_bottom;
     int margin_left;
@@ -28,7 +29,7 @@ public:
 private:
     Ui::Canvas *ui;
 
-    void paintEvent(QPaintEvent *);
+
     void wheelEvent(QWheelEvent *event);
 
     void drawBackground();

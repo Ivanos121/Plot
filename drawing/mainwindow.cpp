@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <math.h>
+#include "canvas.h"
 
 
 MainWindow::MainWindow(QWidget *parent)

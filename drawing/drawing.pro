@@ -11,11 +11,13 @@ CONFIG += c++11
 SOURCES += \
     canvas.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    plot.cpp
 
 HEADERS += \
     canvas.h \
-    mainwindow.h
+    mainwindow.h \
+    plot.h
 
 FORMS += \
     canvas.ui \

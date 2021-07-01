@@ -16,7 +16,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
-     <widget class="Canvas" name="widget" native="true">
+     <widget class="Plot" name="widget" native="true">
       <property name="palette">
        <palette>
         <active>
@@ -88,9 +88,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>Canvas</class>
+   <class>Plot</class>
    <extends>QWidget</extends>
-   <header>canvas.h</header>
+   <header>plot.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
