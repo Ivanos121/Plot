@@ -13,10 +13,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->widget->U_max = 800.0;
     ui->widget->margin_bottom = 40;
     ui->widget->margin_left = 100;
-
-
-
-
+    ui->widget->reset();
 }
 
 MainWindow::~MainWindow()
