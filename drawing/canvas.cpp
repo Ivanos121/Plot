@@ -2,6 +2,7 @@
 #include <QPoint>
 #include <QtMath>
 #include <QWheelEvent>
+#include <QDebug>
 
 #include <iostream>
 
@@ -190,33 +191,86 @@ void Canvas::drawBackground()
 void Canvas::paintEvent(QPaintEvent *)
 {
     drawBackground();
-    drawBorder();
     drawGrid();
     drawMainGrid();
     drawAxisText();
 
     QPainter painter(this);
-    painter.setPen(QPen(QColor(255,50,50), 2));
 
-    double w = 2.0 * M_PI * 50.0;
-    double A = 311;
-
-    for (int x = margin_left + 1; x <=(width() - 20); x ++)
+    for (DataLine& line : dataLines)
     {
-        double t1 = (double)(x - 1 - margin_left)/(double)(width() - margin_left - 20) * t_max_v;
-        double t2 = (double)(x - margin_left)/(double)(width() - margin_left - 20) * t_max_v;
-        double U1 = A * sin(w * (t1 + t_offset)) + U_offset;
-        double U2 = A * sin(w * (t2 + t_offset)) + U_offset;
-        //std::cout << U << std::endl;
+        painter.setPen(QPen(QColor(line.color), 2));
 
-        int y1 = (double)(-U1 / U_max_v * (double)(height() - margin_bottom - 20) + height() - margin_bottom );
-        int y2 = (double)(-U2 / U_max_v * (double)(height() - margin_bottom - 20) + height() - margin_bottom );
-        if (y1 < 20) y1 = 20;
-        if (y1 > height() - margin_bottom) y1 = height() - margin_bottom;
-        if (y2 < 20) y2 = 20;
-        if (y2 > height() - margin_bottom) y2 = height() - margin_bottom;
+        for (int i=0 , n=line.data.size(); i < n - 1 - 1; i++)
+        {
+            double t1 = line.data[i].t;
+            double t2 = line.data[i + 1].t;
 
-        painter.drawLine(x-1,y1,x,y2);
+            int x1 = (t1 - t_offset) / t_max_v * (width() -20 - margin_left) + margin_left;
+            int x2 = (t2 - t_offset) / t_max_v * (width() -20 - margin_left) + margin_left;
+
+            if ((x1 < margin_left) && (x2 < margin_left)) continue;
+            if ((x1 > (width() - 20)) && (x2 > (width() - 20))) continue;
+
+            double U1 = line.data[i].U + U_offset + line.lineOffset;
+            double U2 = line.data[i + 1].U + U_offset + line.lineOffset;
+
+            int y1 = (double)(-U1 / U_max_v * (double)(height() - margin_bottom - 20) + height() - margin_bottom );
+            int y2 = (double)(-U2 / U_max_v * (double)(height() - margin_bottom - 20) + height() - margin_bottom );
+
+            if ((y1 < 20) && (y2 < 20)) continue;
+            if ((y1 > height() -margin_bottom) && (y2 > height() -margin_bottom)) continue;
+
+            if (x1 < margin_left)
+            {
+                double k = (double)(y2 - y1) / (double)(x2 - x1);
+                double b = y1 - k * x1;
+                x1 = margin_left;
+                y1 = k * x1 + b;
+            }
+
+            if (x2 > width() -20)
+            {
+                double k = (double)(y2 - y1) / (double)(x2 - x1);
+                double b = y1 - k * x1;
+                x2 = width() - 20;
+                y2 = k * x2 + b;
+            }
+
+            if (y1 < 20)
+            {
+                double k = (double)(y2 - y1) / (double)(x2 - x1);
+                double b = y1 - k * x1;
+                x1 = (20.0 - b) / k;
+                y1 = 20;
+            }
+            if (y1 > height() - margin_bottom)
+            {
+                double k = (double)(y2 - y1) / (double)(x2 - x1);
+                double b = y1 - k * x1;
+                x1 = (height() - margin_bottom - b) / k;
+                y1 = height() - margin_bottom;
+            }
+            if (y2 < 20)
+            {
+                double k = (double)(y2 - y1) / (double)(x2 - x1);
+                double b = y2 - k * x2;
+                x2 = (20.0 - b) / k;
+                y2 = 20;
+            }
+            if (y2 > height() - margin_bottom)
+            {
+                double k = (double)(y2 - y1) / (double)(x2 - x1);
+                double b = y2 - k * x2;
+                x2 = (height() - margin_bottom - b) / k;
+                y2 = height() - margin_bottom;
+            }
+
+            if (x1 < margin_left) continue;
+            if (x2 > width() -20) continue;
+
+            painter.drawLine(x1,y1,x2,y2);
+        }
     }
 
     if (leftButtonPressed)
@@ -225,6 +279,8 @@ void Canvas::paintEvent(QPaintEvent *)
         painter.setPen(pen);
         painter.drawRect(p1.x(),p1.y(),p2.x() - p1.x(),p2.y() - p1.y());
     }
+
+    drawBorder();
 }
 
 void Canvas::wheelEvent(QWheelEvent *event)
@@ -281,7 +337,7 @@ void Canvas::mousePressEvent(QMouseEvent *e)
     }
 }
 
-void Canvas::mouseReleaseEvent(QMouseEvent *e)
+void Canvas::mouseReleaseEvent(QMouseEvent *)
 {
     if ((p1.x() == p2.x() || (p1.y() == p2.y())))
     {
@@ -320,4 +376,40 @@ void Canvas::mouseMoveEvent(QMouseEvent *e)
         p2 = e->pos();
         repaint();
     }
+}
+
+void Canvas::addPoint(size_t lineNumber, double t, double U)
+{
+    if (lineNumber >= dataLines.size())
+    {
+        return;
+    }
+
+    dataLines[lineNumber].data.push_back(DataPoint(t, U));
+
+    double t_m = t_max_v + t_offset;
+    if (t > t_m)
+    {
+        t_offset = t - t_max_v;
+    }
+
+    if ((U + dataLines[lineNumber].lineOffset) > (U_max_v - U_offset))
+    {
+        U_max_v = U + dataLines[lineNumber].lineOffset + U_offset;
+    }
+
+    if ((U + dataLines[lineNumber].lineOffset) < (-U_offset))
+    {
+        double newOffset = -(U + dataLines[lineNumber].lineOffset);
+        U_max_v = U_max_v - U_offset + newOffset;
+        U_offset = newOffset;
+    }
+
+    repaint();
+}
+
+void Canvas::addDataLine(QColor color, double lineOffset)
+{
+    DataLine newLine(color, lineOffset);
+    dataLines.push_back(newLine);
 }

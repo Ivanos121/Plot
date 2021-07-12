@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QPainter>
+#include <QTimer>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -16,7 +17,13 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+protected slots:
+    void on_timer_timeout();
+
 private:
     Ui::MainWindow *ui;
+
+    double t;
+    QTimer timer;
 };
 #endif // MAINWINDOW_H

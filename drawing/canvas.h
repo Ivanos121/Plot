@@ -7,6 +7,23 @@ namespace Ui {
 class Canvas;
 }
 
+struct DataPoint
+{
+    DataPoint(double _t, double _U) : t(_t), U(_U) {}
+
+    double t;
+    double U;
+};
+
+struct DataLine
+{
+    DataLine(QColor _color, double _lineOffset) : color(_color), lineOffset(_lineOffset) {}
+
+    QColor color;
+    double lineOffset;
+    std::vector<DataPoint> data;
+};
+
 class Canvas : public QWidget
 {
     Q_OBJECT
@@ -31,6 +48,9 @@ public:
 
     double gridStep;
 
+    void addPoint(size_t lineNumber, double t, double U);
+    void addDataLine(QColor color, double lineOffset);
+
 private:
     Ui::Canvas *ui;
     QPoint p1,p2;
@@ -43,6 +63,8 @@ private:
     void drawGrid();
     void drawMainGrid();
     void drawAxisText();
+
+    std::vector<DataLine> dataLines;
 
 protected:
     virtual void mouseDoubleClickEvent(QMouseEvent *event);
